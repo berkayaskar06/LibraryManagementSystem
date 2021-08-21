@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Books{% endblock %}
+{% block body %}
+<body class="d-fix h-100 text-left text-white bg-dark">
+
+
+
+<div class="container">
+    {% for book in books %}
+    <div class="row">
+        <div class="col-md-10">
+            <div class="thumbnail">
+                <div class="caption>">
+                    <h4>{{book.title}}<small>   {{book.rating}}</small></h4>
+                    <form method="post">
+                    <p><a href = "{{book.get_absolute_url}}" class = "btn btn-primary" role="button">Barrow</a></p>
+                        </form>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+<div class="pagination">
+    <span class="step-links">
+        {% if books.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ books.previous_page_number }}{%if request.GET.q %}&q={{request.GET.q}}{% endif %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ books.number }} of {{ books.paginator.num_pages }}.
+        </span>
+
+        {% if books.has_next %}
+            <a href="?page={{ books.next_page_number }}{% if request.GET.q %}&q={{request.GET.q}}{% endif %}">next</a>
+            <a href="?page={{ books.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+</div>
+</body>
+{% endblock %}
