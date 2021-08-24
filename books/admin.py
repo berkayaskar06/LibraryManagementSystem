@@ -6,7 +6,7 @@ class postAdmin(admin.ModelAdmin):
 
     list_display = ['title','author']
     list_display_links = ['title','author']
-    list_filter = ['author']
+    list_filter = ['flag']
     search_fields = ['title','author']
 
     class Meta:

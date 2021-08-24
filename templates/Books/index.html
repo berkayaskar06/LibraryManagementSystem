@@ -12,9 +12,15 @@
             <div class="thumbnail">
                 <div class="caption>">
                     <h4>{{book.title}}<small>   {{book.rating}}</small></h4>
-                    <form method="post">
-                    <p><a href = "{{book.get_absolute_url}}" class = "btn btn-primary" role="button">Barrow</a></p>
-                        </form>
+
+                    <p><a href = "{{book.get_absolute_url}}" class = "btn btn-primary" role="button">Detail</a>
+                    <form method="POST" action="{{book.get_absolute_url}}">
+                            {%csrf_token%}
+                            <input type="submit" class="btn btn-primary" role="button" name="Barrow" id="barrow" value="Barrow">
+                    </form>
+
+
+
 
 
 

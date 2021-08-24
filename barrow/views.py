@@ -5,9 +5,15 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from .models import Barrow
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.views.decorators.cache import cache_page
+
+CACHE_TTL = getattr(settings,'CACHE_TTL',DEFAULT_TIMEOUT)
 
 
 # Create your views here.
+# @cache_page(CACHE_TTL)
 def barrowed_index(request):
 
     barrow_list = Barrow.objects.all()
@@ -25,8 +31,12 @@ def barrowed_index(request):
 
 
 def return_barrow(request,id):
+    book = Books.objects.get(id=id)
     if request.method == 'GET':
-        books = get_object_or_404(Barrow,id=id)
+        Books.objects.filter(id=id).update(flag=False)
+        book.refresh_from_db()
+        books = Barrow.objects.get(id=id)
         books.delete()
-        messages.success(request,'Your Book has been Returned!')
+
+
     return redirect('/books/index/')

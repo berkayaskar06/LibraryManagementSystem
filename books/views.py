@@ -5,9 +5,18 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from barrow.models import Barrow
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.views.decorators.cache import cache_page
+from time import sleep
+
+
+CACHE_TTL = getattr(settings,'CACHE_TTL',DEFAULT_TIMEOUT)
+
 
 
 # Create your views here.
+@cache_page(CACHE_TTL)
 def books_index(request):
 
     book_list = Books.objects.all()
@@ -31,7 +40,7 @@ def books_update(request,id):
     form = PostForm(request.POST or None, instance=books)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Kitap Başarılı Bir Güncellendi Oluşturuldu.')
+        messages.success(request, 'Kitap Başarılı Bir Güncellendi.')
         return HttpResponseRedirect(books.get_absolute_url())
     context = {
         'form': form,
@@ -68,8 +77,10 @@ def books_create(request):
 
     return render(request,'Books/form.html',context)
 
-
+@cache_page(CACHE_TTL)
 def books_details(request,id):
+
+
     books = Books.objects.get(id=id)
     title = books.title
     id = books.id
@@ -77,13 +88,21 @@ def books_details(request,id):
     publish = books.publish
     flag = books.flag
     rating = books.rating
-    if request.method=='GET':
-        flag = True
-        barrow=Barrow.objects.create(id=id, title=title, author=author, publish=publish, flag=flag, rating=rating)
-        barrow.save()
-        messages.success(request,'This Books is Barrowed.You can see in My Books Section')
+    if request.method=='POST':
+        if flag == False:
+            Books.objects.filter(id=id).update(flag=True)
+            books.refresh_from_db()
+            barrow=Barrow.objects.create(id=id, title=title, author=author, publish=publish, flag=True, rating=rating)
+            barrow.save()
+            messages.success(request,'This Books is Barrowed. \n You can see in My Books Section')
+        elif books.flag == True:
+            messages.error(request, 'This Books is already taken!')
+
 
     return render(request,'Books/detail.html',{'books':books})
+
+
+
 
 
 
