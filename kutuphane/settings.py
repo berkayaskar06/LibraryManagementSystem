@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'barrow',
     'books',
     'django_celery_results',
+    'django_celery_beat',
 
 
 ]
@@ -80,6 +81,7 @@ WSGI_APPLICATION = 'kutuphane.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+
 
 DATABASES = {
     'default': {
@@ -146,7 +148,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR,'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CELERY_BROKER_URL = 'redis://localhost:6379/1'
-CELERY_ACCEPT_CONTENT =['json']
+# Celery Configuration Options
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/London'
+CELERY_IMPORTS = ('books.tasks', )
+CELERY_STORE_ERRORS_EVEN_IF_IGNORED = True
+CELERY_TASK_ALWAYS_EAGER = True

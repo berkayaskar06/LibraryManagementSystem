@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.views.decorators.cache import cache_page
 from time import sleep
+from .tasks import book_barrow
 
 
 CACHE_TTL = getattr(settings,'CACHE_TTL',DEFAULT_TIMEOUT)
@@ -79,8 +80,6 @@ def books_create(request):
 
 @cache_page(CACHE_TTL)
 def books_details(request,id):
-
-
     books = Books.objects.get(id=id)
     title = books.title
     id = books.id
@@ -88,12 +87,12 @@ def books_details(request,id):
     publish = books.publish
     flag = books.flag
     rating = books.rating
+    arr_book = [id,title,author,publish,rating]
     if request.method=='POST':
         if flag == False:
             Books.objects.filter(id=id).update(flag=True)
             books.refresh_from_db()
-            barrow=Barrow.objects.create(id=id, title=title, author=author, publish=publish, flag=True, rating=rating)
-            barrow.save()
+            book_barrow.delay(arr_book)
             messages.success(request,'This Books is Barrowed. \n You can see in My Books Section')
         elif books.flag == True:
             messages.error(request, 'This Books is already taken!')
